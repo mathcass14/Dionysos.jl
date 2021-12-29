@@ -2,7 +2,7 @@
 module Plot
 
 import ..Abstraction
-AB = Abstraction
+const AB = Abstraction
 
 using LinearAlgebra
 using StaticArrays
