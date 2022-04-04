@@ -24,18 +24,45 @@ end
 
 # Cells
 function domain!(ax, vars, domain::AB.Domain{N,T};
-        fc = "red", fa = 0.5, ec = "black", ea = 1.0, ew = 1.5) where {N,T}
+    fc = "red", fa = 0.5, ec = "black", ea = 1.0, ew = 1.5) where {N,T}
+grid = domain.grid
+@assert length(vars) == 2 && N >= 2
+fca = FC(fc, fa)
+eca = FC(ec, ea)
+h = project(grid.h, vars)
+
+vertslist = NTuple{4,SVector{2,T}}[]
+
+for pos in unique(x -> x[vars], AB.enum_pos(domain))
+    c = project(AB.get_coord_by_pos(grid, pos), vars)
+    push!(vertslist, verts_rect(c, h/2.0))
+end
+
+polylist = matplotlib.collections.PolyCollection(vertslist)
+polylist.set_facecolor(fca)
+polylist.set_edgecolor(eca)
+polylist.set_linewidth(ew)
+ax.add_collection(polylist)
+end
+
+function domain_ellips!(ax, vars, P, domain::AB.Domain{N,T};
+    fc = "red", fa = 0.5, ec = "black", ea = 1.0, ew = 1.5) where {N,T}
     grid = domain.grid
     @assert length(vars) == 2 && N >= 2
     fca = FC(fc, fa)
     eca = FC(ec, ea)
     h = project(grid.h, vars)
+    L = cholesky(P).factors;
+    theta = range(0,2π,length=20);
+    x = L\hcat(sin.(theta),cos.(theta))'
+
+
 
     vertslist = NTuple{4,SVector{2,T}}[]
 
     for pos in unique(x -> x[vars], AB.enum_pos(domain))
         c = project(AB.get_coord_by_pos(grid, pos), vars)
-        push!(vertslist, verts_rect(c, h/2.0))
+        push!(vertslist, tuple(eachcol(x.+c)...))
     end
 
     polylist = matplotlib.collections.PolyCollection(vertslist)
