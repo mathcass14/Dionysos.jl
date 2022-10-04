@@ -284,15 +284,15 @@ function control!(torques::AbstractVector, t, state::MechanismState)
         # torques[configuration_range(state, joint)] .= -1*configuration(state,joint)
         # end
         if !isempty(v_range) && v_range ⊆ controllable_joints
-            print(state.q[v_range])
-            print("\t")
+            # print(state.q[v_range])
+            # print("\t")
             torques[v_range] .= -50*state.q[v_range] -1*state.v[v_range] +10*integrator[v_range]
             integrator[v_range] .= integrator[v_range] - 0.001*state.q[v_range]
         else
             torques[v_range] .= 0 # no control
         end
     end
-    println()
+    #println()
 end
 
 ts, qs, vs = simulate(state, 1, control!; Δt = 1e-3); 
